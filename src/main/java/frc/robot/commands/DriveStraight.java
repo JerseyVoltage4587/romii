@@ -36,16 +36,16 @@ public class DriveStraight extends CommandBase {
   @Override
   public void initialize() {
     m_startTime        = Timer.getFPGATimestamp();
-    m_startLeftMeters  = m_drivetrain.getLeftDistanceInch();
-    m_startRightMeters = m_drivetrain.getRightDistanceInch();
+    m_startLeftMeters  = m_drivetrain.getLeftDistanceMeters();
+    m_startRightMeters = m_drivetrain.getRightDistanceMeters();
     System.out.println("m_startTime="+m_startTime+",m_startLeft="+m_startLeftMeters+",m_startRight="+m_startRightMeters);
   }
 
   @Override
   public void execute() {
     double elapsed_time = Timer.getFPGATimestamp() - m_startTime;
-    m_leftTravel  = m_drivetrain.getLeftDistanceInch()  - m_startLeftMeters;
-    m_rightTravel = m_drivetrain.getRightDistanceInch() - m_startRightMeters;
+    m_leftTravel  = m_drivetrain.getLeftDistanceMeters()  - m_startLeftMeters;
+    m_rightTravel = m_drivetrain.getRightDistanceMeters() - m_startRightMeters;
 
     double expected_distance, expected_velocity, expected_acceleration;
     if ( elapsed_time > m_profile.totalTime()) {

@@ -36,8 +36,8 @@ public class ForwardPID extends CommandBase {
   @Override
   public void initialize() {
     m_startTime = Timer.getFPGATimestamp(); // returns system clock time in seconds (double)
-    m_startLeftMeters  = m_drivetrain.getLeftDistanceInch();
-    m_startRightMeters = m_drivetrain.getRightDistanceInch();
+    m_startLeftMeters  = m_drivetrain.getLeftDistanceMeters();
+    m_startRightMeters = m_drivetrain.getRightDistanceMeters();
     System.out.println("Initialized!");
     System.out.println(m_profile.totalTime());
   }
@@ -48,8 +48,8 @@ public class ForwardPID extends CommandBase {
     // timer
     elapsed_time = Timer.getFPGATimestamp() - m_startTime;
     // real distance traveled
-    m_leftTravel  = m_drivetrain.getLeftDistanceInch()  - m_startLeftMeters;
-    m_rightTravel = m_drivetrain.getRightDistanceInch() - m_startRightMeters;
+    m_leftTravel  = m_drivetrain.getLeftDistanceMeters()  - m_startLeftMeters;
+    m_rightTravel = m_drivetrain.getRightDistanceMeters() - m_startRightMeters;
     System.out.println("Elapsed Time" + elapsed_time);
     // 
     double expected_distance, expected_velocity, expected_acceleration;
