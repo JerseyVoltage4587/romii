@@ -46,44 +46,45 @@ public class ForwardPID extends CommandBase {
   @Override
   public void execute() {
     // timer
-    double elapsed_time = Timer.getFPGATimestamp() - m_startTime;
+    elapsed_time = Timer.getFPGATimestamp() - m_startTime;
     // real distance traveled
     m_leftTravel  = m_drivetrain.getLeftDistanceInch()  - m_startLeftMeters;
     m_rightTravel = m_drivetrain.getRightDistanceInch() - m_startRightMeters;
     System.out.println("Elapsed Time" + elapsed_time);
     // 
+    double expected_distance, expected_velocity, expected_acceleration;
     if(elapsed_time > m_profile.totalTime()) {
-      position = m_distance;
-      velocity = 0;
-      acceleration = 0;
+      expected_distance = m_distance;
+      expected_velocity = 0;
+      expected_acceleration = 0;
       System.out.println("If ran!!");
     }
     else {
       TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time);
       TrapezoidProfile.State new_State = m_profile.calculate(elapsed_time + Constants.kSecondsPerCycle);
-      position = expected_state.position;
+      expected_distance = expected_state.position;
       System.out.println("Position: " + position);
-      velocity = expected_state.velocity;
+      expected_velocity = expected_state.velocity;
       System.out.println("Velocity: " + velocity);
-      acceleration = (new_State.velocity - expected_state.velocity)/Constants.kSecondsPerCycle;
+      expected_acceleration = (new_State.velocity - expected_state.velocity)/Constants.kSecondsPerCycle;
       System.out.println("Else ran!!");
     }
 
-    double leftError = position - m_leftTravel;
-    double rightError = position - m_rightTravel;
+    double leftError = expected_distance - m_leftTravel;
+    double rightError = expected_distance - m_rightTravel;
 
     double left_voltage = Constants.ksVolts
-                           + velocity * Constants.kvVolts
-                           + acceleration * Constants.kaVolts
+                           + expected_velocity * Constants.kvVolts
+                           + expected_acceleration * Constants.kaVolts
                            + leftError * Constants.kpDriveVel;
 
     double right_voltage = Constants.ksVolts
-                           + velocity * Constants.kvVolts
-                           + acceleration * Constants.kaVolts
+                           + expected_velocity * Constants.kvVolts
+                           + expected_acceleration * Constants.kaVolts
                            + rightError * Constants.kpDriveVel;
 
-    m_drivetrain.setLeftVolts  ( left_voltage  );
-    m_drivetrain.setRightVolts ( right_voltage );
+    m_drivetrain.setLeftVolts(left_voltage);
+    m_drivetrain.setRightVolts(right_voltage);
 
     SmartDashboard.putNumber("Expected Distance", position);
     SmartDashboard.putNumber("Expected Velocity", velocity);

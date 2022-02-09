@@ -13,10 +13,10 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static final double ksVolts = 0.929;
+    public static final double ksVolts = 0.4645;//0.929;
     public static final double kvVolts = 6.33;
     public static final double kaVolts = 0.0389;
-    public static final double kpDriveVel = 0.05;//0.0385;
+    public static final double kpDriveVel = 0.1;//0.0385;
     public static final double kMaxSpeed = 0.8;
     public static final double kMaxAcceleration = 0.8;
     public static final double kSecondsPerCycle = 0.020;

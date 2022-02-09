@@ -1,4 +1,18 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "RomiGyro": {
+        "header": {
+          "open": true
+        }
+      }
+    },
+    "RoboRIO": {
+      "RoboRIO Input": {
+        "open": true
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -22,12 +36,29 @@
   },
   "NetworkTables": {
     "CameraPublisher": {
-      "open": true,
       "rPi Camera 0": {
         "open": true
       }
     },
+    "LiveWindow": {
+      ".status": {
+        "open": true
+      },
+      "Drivetrain": {
+        "open": true
+      },
+      "OnBoardIO": {
+        "open": true
+      },
+      "Ungrouped": {
+        "open": true
+      },
+      "open": true
+    },
     "SmartDashboard": {
+      "SendableChooser[0]": {
+        "open": true
+      },
       "open": true
     }
   }
