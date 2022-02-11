@@ -19,9 +19,9 @@ public class DriveStraight extends CommandBase {
   private double m_startTime, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
 
-  public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) {
-    m_distance   = distance;    // meters
-    m_tolerance  = tolerance;   // meters
+public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) {
+    m_distance   = Units.feetToMeters(distance);    // meters
+    m_tolerance  = Units.inchesToMeters(tolerance);   // meters
     m_drivetrain = drivetrain;
     m_profile = new TrapezoidProfile (
                     new TrapezoidProfile.Constraints(Constants.kMaxSpeed,
@@ -36,16 +36,16 @@ public class DriveStraight extends CommandBase {
   @Override
   public void initialize() {
     m_startTime        = Timer.getFPGATimestamp();
-    m_startLeftMeters  = m_drivetrain.getLeftDistanceMeters();
-    m_startRightMeters = m_drivetrain.getRightDistanceMeters();
+    m_startLeftMeters  = m_drivetrain.getLeftDistanceInches();
+    m_startRightMeters = m_drivetrain.getRightDistanceInches();
     System.out.println("m_startTime="+m_startTime+",m_startLeft="+m_startLeftMeters+",m_startRight="+m_startRightMeters);
   }
 
   @Override
   public void execute() {
     double elapsed_time = Timer.getFPGATimestamp() - m_startTime;
-    m_leftTravel  = m_drivetrain.getLeftDistanceMeters()  - m_startLeftMeters;
-    m_rightTravel = m_drivetrain.getRightDistanceMeters() - m_startRightMeters;
+    m_leftTravel  = m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters;
+    m_rightTravel = m_drivetrain.getRightDistanceInches() - m_startRightMeters;
 
     double expected_distance, expected_velocity, expected_acceleration;
     if ( elapsed_time > m_profile.totalTime()) {
@@ -55,7 +55,7 @@ public class DriveStraight extends CommandBase {
     } else {
         TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time);
         TrapezoidProfile.State next_state     = m_profile.calculate(elapsed_time + Constants.kSecondsPerCycle);
-        expected_distance     = (expected_state.position * 12);
+        expected_distance     = (expected_state.position);
         expected_velocity     = expected_state.velocity;
         expected_acceleration = (next_state.velocity - expected_state.velocity) / Constants.kSecondsPerCycle;
     }
@@ -92,9 +92,8 @@ public class DriveStraight extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    m_drivetrain.setLeftVolts(0.0);
-    m_drivetrain.setRightVolts(0.0);
-    // Let the drivetrain revert to its default command.
+
+        // Let the drivetrain revert to its default command.
   }
 
   // Returns true when the command should end.

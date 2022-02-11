@@ -15,7 +15,7 @@ import frc.robot.subsystems.Drivetrain;
 public class ForwardPID extends CommandBase {
   /** Creates a new ForwardPID. */
   Drivetrain m_drivetrain;
-  private double m_startTime, elapsed_time, position, velocity, acceleration, m_startLeftMeters, m_startRightMeters;
+  private double m_startTime, elapsed_time, expected_distance, velocity, acceleration, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
   private double m_tolerance, m_distance;
   private final TrapezoidProfile.Constraints m_constraints = 
@@ -27,8 +27,8 @@ public class ForwardPID extends CommandBase {
   public ForwardPID( double distance, double tolerance, Drivetrain m_drive ) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_drivetrain = m_drive;
-    m_tolerance = tolerance;
-    m_distance = distance;
+    m_tolerance = Units.inchesToMeters(tolerance);
+    m_distance = Units.feetToMeters(distance);
     addRequirements(m_drivetrain);
   }
 
@@ -36,8 +36,8 @@ public class ForwardPID extends CommandBase {
   @Override
   public void initialize() {
     m_startTime = Timer.getFPGATimestamp(); // returns system clock time in seconds (double)
-    m_startLeftMeters  = m_drivetrain.getLeftDistanceMeters();
-    m_startRightMeters = m_drivetrain.getRightDistanceMeters();
+    m_startLeftMeters  = m_drivetrain.getLeftDistanceInches();
+    m_startRightMeters = m_drivetrain.getRightDistanceInches();
     System.out.println("Initialized!");
     System.out.println(m_profile.totalTime());
   }
@@ -48,8 +48,8 @@ public class ForwardPID extends CommandBase {
     // timer
     elapsed_time = Timer.getFPGATimestamp() - m_startTime;
     // real distance traveled
-    m_leftTravel  = m_drivetrain.getLeftDistanceMeters()  - m_startLeftMeters;
-    m_rightTravel = m_drivetrain.getRightDistanceMeters() - m_startRightMeters;
+    m_leftTravel  = m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters;
+    m_rightTravel = m_drivetrain.getRightDistanceInches() - m_startRightMeters;
     System.out.println("Elapsed Time" + elapsed_time);
     // 
     double expected_distance, expected_velocity, expected_acceleration;
@@ -63,7 +63,7 @@ public class ForwardPID extends CommandBase {
       TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time);
       TrapezoidProfile.State new_State = m_profile.calculate(elapsed_time + Constants.kSecondsPerCycle);
       expected_distance = expected_state.position;
-      System.out.println("Position: " + position);
+      System.out.println("expected_distance: " + expected_distance);
       expected_velocity = expected_state.velocity;
       System.out.println("Velocity: " + velocity);
       expected_acceleration = (new_State.velocity - expected_state.velocity)/Constants.kSecondsPerCycle;
@@ -86,7 +86,7 @@ public class ForwardPID extends CommandBase {
     m_drivetrain.setLeftVolts(left_voltage);
     m_drivetrain.setRightVolts(right_voltage);
 
-    SmartDashboard.putNumber("Expected Distance", position);
+    SmartDashboard.putNumber("Expected Distance", expected_distance);
     SmartDashboard.putNumber("Expected Velocity", velocity);
     SmartDashboard.putNumber("Expected Acceleration", acceleration);
     SmartDashboard.putNumber("Left Travel", m_leftTravel);
@@ -95,8 +95,8 @@ public class ForwardPID extends CommandBase {
     SmartDashboard.putNumber("Right Error", rightError);
     SmartDashboard.putNumber("Left Voltage", left_voltage);
     SmartDashboard.putNumber("Right Voltage", right_voltage);
-    SmartDashboard.putNumber("Left Shortage", m_leftTravel - position);
-    SmartDashboard.putNumber("Right Shortage", m_rightTravel - position);
+    SmartDashboard.putNumber("Left Shortage", m_leftTravel - expected_distance);
+    SmartDashboard.putNumber("Right Shortage", m_rightTravel - expected_distance);
     SmartDashboard.putNumber("Elapsed Time", elapsed_time);
   }
     
@@ -110,8 +110,8 @@ public class ForwardPID extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (Math.abs(m_leftTravel  - position) < m_tolerance)
+    return (Math.abs(m_leftTravel  - expected_distance) < m_tolerance)
            &&
-           (Math.abs(m_rightTravel - position) < m_tolerance);
+           (Math.abs(m_rightTravel - expected_distance) < m_tolerance);
   }
 }
