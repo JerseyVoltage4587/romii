@@ -73,14 +73,14 @@ public class ForwardPID extends CommandBase {
     double leftError = expected_distance - m_leftTravel;
     double rightError = expected_distance - m_rightTravel;
 
-    double left_voltage = Constants.ksVolts
-                           + expected_velocity * Constants.kvVolts
-                           + expected_acceleration * Constants.kaVolts
+    double left_voltage = Constants.ksVoltsLeft
+                           + expected_velocity * Constants.kvVoltsLeft
+                           + expected_acceleration * Constants.kaVoltsLeft
                            + leftError * Constants.kpDriveVel;
 
-    double right_voltage = Constants.ksVolts
-                           + expected_velocity * Constants.kvVolts
-                           + expected_acceleration * Constants.kaVolts
+    double right_voltage = Constants.ksVoltsRight
+                           + expected_velocity * Constants.kvVoltsRight
+                           + expected_acceleration * Constants.kaVoltsRight
                            + rightError * Constants.kpDriveVel;
 
     m_drivetrain.setLeftVolts(left_voltage);
