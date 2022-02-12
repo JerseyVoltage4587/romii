@@ -35,47 +35,58 @@ public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) 
 
   @Override
   public void initialize() {
-    m_startTime        = Timer.getFPGATimestamp();
-    m_startLeftMeters  = m_drivetrain.getLeftDistanceInches();
-    m_startRightMeters = m_drivetrain.getRightDistanceInches();
+    m_startTime        = Timer.getFPGATimestamp(); // Get start time
+    m_startLeftMeters  = m_drivetrain.getLeftDistanceInches(); // get distance for left
+    m_startRightMeters = m_drivetrain.getRightDistanceInches(); // get distance for right
     System.out.println("m_startTime="+m_startTime+",m_startLeft="+m_startLeftMeters+",m_startRight="+m_startRightMeters);
   }
 
   @Override
   public void execute() {
-    double elapsed_time = Timer.getFPGATimestamp() - m_startTime;
-    m_leftTravel  = m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters;
-    m_rightTravel = m_drivetrain.getRightDistanceInches() - m_startRightMeters;
+    double elapsed_time = Timer.getFPGATimestamp() - m_startTime; // subtracts startTime from timer to get more accurate time.
+    m_leftTravel  = m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters; 
+      // subtracts starting distance from distance to get more accurate distance.
+    m_rightTravel = m_drivetrain.getRightDistanceInches() - m_startRightMeters; 
+      // subtracts starting distance from distance to get more accurate distance.
 
     double expected_distance, expected_velocity, expected_acceleration;
-    if ( elapsed_time > m_profile.totalTime()) {
-        expected_distance     = m_distance;
-        expected_velocity     = 0;
-        expected_acceleration = 0;
+    if ( elapsed_time > m_profile.totalTime()) { // when the time passes the expected time
+        expected_distance     = m_distance; // set expected distance to the distance inputted to travel
+        expected_velocity     = 0; // set expected velocity to 0
+        expected_acceleration = 0; // set expected acceleration to 0
+        System.out.println("end expected distance: " + expected_distance);
     } else {
-        TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time);
+        TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time); // calculated the current expected state
         TrapezoidProfile.State next_state     = m_profile.calculate(elapsed_time + Constants.kSecondsPerCycle);
-        expected_distance     = (expected_state.position);
-        expected_velocity     = expected_state.velocity;
-        expected_acceleration = (next_state.velocity - expected_state.velocity) / Constants.kSecondsPerCycle;
+          // calculate the expected state in the next cycle (0.02s)
+        expected_distance     = (expected_state.position); // set expected distance to the position of the current state
+        expected_velocity     = expected_state.velocity; // set expected velocity to the velocity of the current state
+        expected_acceleration = (next_state.velocity - expected_state.velocity) / Constants.kSecondsPerCycle; // 
+        System.out.println("expected distance: "+expected_state.position);
+
+        System.out.println("next expected distance: "+next_state.position);
+        System.out.println((m_leftTravel + m_rightTravel)/2);
+
     }
 
     double left_error  = expected_distance - m_leftTravel;
     double right_error = expected_distance - m_rightTravel;
 
-    double left_voltage = /*Constants.ksVolts
-                          +*/ expected_velocity * Constants.kvVolts
-                          + expected_acceleration * Constants.kaVolts
+    double left_voltage = Constants.ksVoltsLeft
+                          + expected_velocity * Constants.kvVoltsLeft
+                          + expected_acceleration * Constants.kaVoltsLeft
                           + left_error * Constants.kpDriveVel;
 
-    double right_voltage = /*Constants.ksVolts
-                           +*/ expected_velocity * Constants.kvVolts
-                           + expected_acceleration * Constants.kaVolts
+    double right_voltage = Constants.ksVoltsRight
+                           + expected_velocity * Constants.kvVoltsRight
+                           + expected_acceleration * Constants.kaVoltsRight
                            + right_error * Constants.kpDriveVel;
 
-    m_drivetrain.setLeftVolts  ( left_voltage  );
+    m_drivetrain.setLeftVolts  ( left_voltage );
     m_drivetrain.setRightVolts ( right_voltage );
 
+    System.out.println("left voltage: " + left_voltage);
+    System.out.println("right voltage: " + right_voltage);
     SmartDashboard.putNumber("Expected Distance", expected_distance);
     SmartDashboard.putNumber("Expected Velocity", expected_velocity);
     SmartDashboard.putNumber("Actual Velocity", ((m_leftTravel + m_rightTravel) / 2)  /elapsed_time);
