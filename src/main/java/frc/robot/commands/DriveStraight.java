@@ -36,17 +36,17 @@ public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) 
   @Override
   public void initialize() {
     m_startTime        = Timer.getFPGATimestamp(); // Get start time
-    m_startLeftMeters  = m_drivetrain.getLeftDistanceInches(); // get distance for left
-    m_startRightMeters = m_drivetrain.getRightDistanceInches(); // get distance for right
+    m_startLeftMeters  = Units.inchesToMeters(m_drivetrain.getLeftDistanceInches()); // get distance for left
+    m_startRightMeters = Units.inchesToMeters(m_drivetrain.getRightDistanceInches()); // get distance for right
     System.out.println("m_startTime="+m_startTime+",m_startLeft="+m_startLeftMeters+",m_startRight="+m_startRightMeters);
   }
 
   @Override
   public void execute() {
     double elapsed_time = Timer.getFPGATimestamp() - m_startTime; // subtracts startTime from timer to get more accurate time.
-    m_leftTravel  = m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters; 
+    m_leftTravel  = Units.inchesToMeters(m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters);
       // subtracts starting distance from distance to get more accurate distance.
-    m_rightTravel = m_drivetrain.getRightDistanceInches() - m_startRightMeters; 
+    m_rightTravel = Units.inchesToMeters(m_drivetrain.getRightDistanceInches() - m_startRightMeters);
       // subtracts starting distance from distance to get more accurate distance.
 
     double expected_distance, expected_velocity, expected_acceleration;
@@ -69,7 +69,7 @@ public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) 
 
     }
 
-    double left_error  = expected_distance - m_leftTravel;
+    double left_error  = expected_distance - m_leftTravel ;
     double right_error = expected_distance - m_rightTravel;
 
     double left_voltage = Constants.ksVoltsLeft
