@@ -63,13 +63,13 @@ public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) 
     double left_error  = expected_distance - m_leftTravel;
     double right_error = expected_distance - m_rightTravel;
 
-    double left_voltage = Constants.ksVolts
-                          + expected_velocity * Constants.kvVolts
+    double left_voltage = /*Constants.ksVolts
+                          +*/ expected_velocity * Constants.kvVolts
                           + expected_acceleration * Constants.kaVolts
                           + left_error * Constants.kpDriveVel;
 
-    double right_voltage = Constants.ksVolts
-                           + expected_velocity * Constants.kvVolts
+    double right_voltage = /*Constants.ksVolts
+                           +*/ expected_velocity * Constants.kvVolts
                            + expected_acceleration * Constants.kaVolts
                            + right_error * Constants.kpDriveVel;
 
@@ -78,6 +78,7 @@ public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) 
 
     SmartDashboard.putNumber("Expected Distance", expected_distance);
     SmartDashboard.putNumber("Expected Velocity", expected_velocity);
+    SmartDashboard.putNumber("Actual Velocity", ((m_leftTravel + m_rightTravel) / 2)  /elapsed_time);
     SmartDashboard.putNumber("Expected Acceleration", expected_acceleration);
     SmartDashboard.putNumber("Left Travel", m_leftTravel);
     SmartDashboard.putNumber("Right Travel", m_rightTravel);
@@ -88,6 +89,8 @@ public DriveStraight( double distance, double tolerance, Drivetrain drivetrain) 
     SmartDashboard.putNumber("Left Shortage", m_leftTravel - m_distance);
     SmartDashboard.putNumber("Right Shortage", m_rightTravel - m_distance);
     SmartDashboard.putNumber("Elapsed Time", elapsed_time);
+    SmartDashboard.putNumber("Expected Completion Time", m_profile.totalTime());
+    SmartDashboard.putNumber("Average Travel", (m_leftTravel + m_rightTravel)/2);
   }
 
   @Override
