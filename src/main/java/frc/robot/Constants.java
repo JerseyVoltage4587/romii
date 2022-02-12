@@ -11,6 +11,11 @@ package frc.robot;
  *
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
+ * 
+ * kv - motor voltage to cruise at a specific velocity (in meters/sec)
+ * ka - motor voltage to accelerate at a specific rate (in meters/sec ^2)
+ * ks - motor voltage to accelerate at a certain rate (meters/sec)
+ * 
  */
 public final class Constants {
     public static final double ksVolts = 0.4645;//0.929;
