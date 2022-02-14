@@ -19,9 +19,9 @@ public class ForwardPID extends CommandBase {
   private double m_startTime, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
   private boolean m_forward;
-  private double left_voltage, right_voltage;
+  private double left_voltage, right_voltage, m_heading;
 
-public ForwardPID( double distance, double tolerance, Drivetrain drivetrain, boolean forward) {
+public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, boolean forward) {
     m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
     m_tolerance  = Units.inchesToMeters(tolerance);   // meters
     m_drivetrain = drivetrain;
@@ -58,7 +58,8 @@ public ForwardPID( double distance, double tolerance, Drivetrain drivetrain, boo
         expected_velocity     = 0; // set expected velocity to 0
         expected_acceleration = 0; // set expected acceleration to 0
         System.out.println("end expected distance: " + expected_distance);
-    } else {
+    }
+    else {
         TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time); // calculated the current expected state
         TrapezoidProfile.State next_state     = m_profile.calculate(elapsed_time + Constants.kSecondsPerCycle);
           // calculate the expected state in the next cycle (0.02s)
@@ -96,10 +97,32 @@ public ForwardPID( double distance, double tolerance, Drivetrain drivetrain, boo
                                 + expected_acceleration * Constants.kaVoltsRight
                                 + right_error * Constants.kpDriveVel);
     }
-    
 
-    m_drivetrain.setLeftVolts  ( left_voltage );
-    m_drivetrain.setRightVolts ( right_voltage );
+    double delta = m_drivetrain.getGyroAngleZ() - m_heading;
+
+    if (delta > 180) {
+      delta -= 360;
+    }
+
+    if (delta < -180) {
+      delta += 360;
+    }
+
+    if (Math.abs(delta) > 2) {
+      if (delta < 0) {
+        right_voltage -= 0.01;
+        m_drivetrain.setRightVolts(right_voltage);
+      }
+      else if (delta > 0) {
+        right_voltage += 0.01;
+        m_drivetrain.setRightVolts(right_voltage);
+      }
+    }
+    else {
+      m_drivetrain.setLeftVolts  (left_voltage);
+      m_drivetrain.setRightVolts (right_voltage);
+    }
+
 
     System.out.println("left voltage: " + left_voltage);
     System.out.println("right voltage: " + right_voltage);
