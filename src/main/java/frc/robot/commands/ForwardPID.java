@@ -18,11 +18,14 @@ public class ForwardPID extends CommandBase {
   private final TrapezoidProfile m_profile;
   private double m_startTime, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
+  private boolean m_forward;
+  private double left_voltage, right_voltage;
 
-public ForwardPID( double distance, double tolerance, Drivetrain drivetrain) {
-    m_distance   = Units.feetToMeters(distance);    // meters
+public ForwardPID( double distance, double tolerance, Drivetrain drivetrain, boolean forward) {
+    m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
     m_tolerance  = Units.inchesToMeters(tolerance);   // meters
     m_drivetrain = drivetrain;
+    m_forward = forward;
     m_profile = new TrapezoidProfile (
                     new TrapezoidProfile.Constraints(Constants.kMaxSpeed,
                                                      Constants.kMaxAcceleration),
@@ -44,9 +47,9 @@ public ForwardPID( double distance, double tolerance, Drivetrain drivetrain) {
   @Override
   public void execute() {
     double elapsed_time = Timer.getFPGATimestamp() - m_startTime; // subtracts startTime from timer to get more accurate time.
-    m_leftTravel  = Units.inchesToMeters(m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters);
+    m_leftTravel  = Math.abs(Units.inchesToMeters(m_drivetrain.getLeftDistanceInches())  - m_startLeftMeters);
       // subtracts starting distance from distance to get more accurate distance.
-    m_rightTravel = Units.inchesToMeters(m_drivetrain.getRightDistanceInches() - m_startRightMeters);
+    m_rightTravel = Math.abs(Units.inchesToMeters(m_drivetrain.getRightDistanceInches()) - m_startRightMeters);
       // subtracts starting distance from distance to get more accurate distance.
 
     double expected_distance, expected_velocity, expected_acceleration;
@@ -64,23 +67,36 @@ public ForwardPID( double distance, double tolerance, Drivetrain drivetrain) {
         expected_acceleration = (next_state.velocity - expected_state.velocity) / Constants.kSecondsPerCycle; // 
         System.out.println("expected distance: "+expected_state.position);
 
-        System.out.println("next expected distance: "+next_state.position);
+        System.out.println("next expected distance: " + next_state.position);
         System.out.println((m_leftTravel + m_rightTravel)/2);
 
     }
 
-    double left_error  = expected_distance - m_leftTravel ;
-    double right_error = expected_distance - m_rightTravel;
+    double left_error  = Math.abs(expected_distance - m_leftTravel);
+    double right_error = Math.abs(expected_distance - m_rightTravel);
+    if (m_forward == true) {
+      left_voltage = Constants.ksVoltsLeft
+                                + expected_velocity * Constants.kvVoltsLeft
+                                + expected_acceleration * Constants.kaVoltsLeft
+                                + left_error * Constants.kpDriveVel;
 
-    double left_voltage = Constants.ksVoltsLeft
-                          + expected_velocity * Constants.kvVoltsLeft
-                          + expected_acceleration * Constants.kaVoltsLeft
-                          + left_error * Constants.kpDriveVel;
+      right_voltage = Constants.ksVoltsRight
+                                + expected_velocity * Constants.kvVoltsRight
+                                + expected_acceleration * Constants.kaVoltsRight
+                                + right_error * Constants.kpDriveVel;
+    } 
+    else {
+      left_voltage = -1 * (Constants.ksVoltsLeft
+                                + expected_velocity * Constants.kvVoltsLeft
+                                + expected_acceleration * Constants.kaVoltsLeft
+                                + left_error * Constants.kpDriveVel);
 
-    double right_voltage = Constants.ksVoltsRight
-                           + expected_velocity * Constants.kvVoltsRight
-                           + expected_acceleration * Constants.kaVoltsRight
-                           + right_error * Constants.kpDriveVel;
+      right_voltage = -1 * (Constants.ksVoltsRight
+                                + expected_velocity * Constants.kvVoltsRight
+                                + expected_acceleration * Constants.kaVoltsRight
+                                + right_error * Constants.kpDriveVel);
+    }
+    
 
     m_drivetrain.setLeftVolts  ( left_voltage );
     m_drivetrain.setRightVolts ( right_voltage );
