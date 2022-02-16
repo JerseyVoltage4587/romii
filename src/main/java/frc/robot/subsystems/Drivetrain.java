@@ -55,6 +55,14 @@ public class Drivetrain extends SubsystemBase {
     m_rightMotor.setVoltage(a);
   }
 
+  public void setLeftMotorLevel(double a) {
+    m_leftMotor.set(a);
+  }
+
+  public void setRightMotorLevel(double a) {
+    m_rightMotor.set(a);
+  }
+
   public void arcadeDrive(double xaxisSpeed, double zaxisRotate) {
     m_diffDrive.arcadeDrive(xaxisSpeed, zaxisRotate);
   }

@@ -25,14 +25,15 @@ package frc.robot;
  */
 
 public final class Constants {
-    public static final double ksVoltsRight = 0.4;//0.929;
-    public static final double kvVoltsRight = 12;//6.33;
-    public static final double kaVoltsRight = 0.15;//0.0389;
     public static final double ksVoltsLeft = 0.4;//0.929;
     public static final double kvVoltsLeft = 11;//6.33;
     public static final double kaVoltsLeft = 0.15;//0.0389;
+    public static final double ksVoltsRight = 0.4;//0.929;
+    public static final double kvVoltsRight = 11;//6.33;
+    public static final double kaVoltsRight = 0.15;//0.0389;
     public static final double kpDriveVel = 1;//12  0.0385;
     public static final double kMaxSpeed = 0.5;//0.8;
     public static final double kMaxAcceleration = 0.8;
     public static final double kSecondsPerCycle = 0.020;
+    
 }
