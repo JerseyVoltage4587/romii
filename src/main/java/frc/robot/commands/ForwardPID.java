@@ -58,6 +58,7 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
         expected_distance     = m_distance; // set expected distance to the distance inputted to travel
         expected_velocity     = 0; // set expected velocity to 0
         expected_acceleration = 0; // set expected acceleration to 0
+
     }
     else {
         TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time); // calculated the current expected state
@@ -66,6 +67,9 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
         expected_distance     = (expected_state.position); // set expected distance to the position of the current state
         expected_velocity     = expected_state.velocity; // set expected velocity to the velocity of the current state
         expected_acceleration = (next_state.velocity - expected_state.velocity) / Constants.kSecondsPerCycle; // 
+
+
+
 
 
     }
@@ -142,6 +146,7 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
     SmartDashboard.putNumber("Elapsed Time", elapsed_time);
     SmartDashboard.putNumber("Expected Completion Time", m_profile.totalTime());
     SmartDashboard.putNumber("Average Travel", (m_leftTravel + m_rightTravel)/2);
+
   }
 
   @Override
@@ -156,5 +161,6 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
     return (Math.abs(m_leftTravel  - m_distance) < m_tolerance)
            &&
            (Math.abs(m_rightTravel - m_distance) < m_tolerance);
+    
   }
 }
