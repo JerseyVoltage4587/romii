@@ -21,11 +21,12 @@ public class ForwardPID extends CommandBase {
   private boolean m_forward;
   private double left_voltage, right_voltage, m_heading;
 
-public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, boolean forward) {
+public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, boolean forward, double heading) {
     m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
     m_tolerance  = Units.inchesToMeters(tolerance);   // meters
     m_drivetrain = drivetrain;
     m_forward = forward;
+    m_heading = heading;
     m_profile = new TrapezoidProfile (
                     new TrapezoidProfile.Constraints(Constants.kMaxSpeed,
                                                      Constants.kMaxAcceleration),
@@ -99,23 +100,24 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
     }
 
     double delta = m_drivetrain.getGyroAngleZ() - m_heading;
-
-    if (delta > 180) {
-      delta -= 360;
-    }
-
-    if (delta < -180) {
-      delta += 360;
-    }
-
-    if (Math.abs(delta) > 2) {
-      if (delta < 0) {
-        right_voltage -= 0.01;
-        m_drivetrain.setRightVolts(right_voltage);
+    if (delta != 0) {
+      if (delta > 180) {
+        delta -= 360;
       }
-      else if (delta > 0) {
-        right_voltage += 0.01;
-        m_drivetrain.setRightVolts(right_voltage);
+
+      if (delta < -180) {
+        delta += 360;
+      }
+
+      if (Math.abs(delta) > 1) {
+        if (delta < 0) {
+          right_voltage += 0.001;
+          m_drivetrain.setRightVolts(right_voltage);
+        }
+        else if (delta > 0) {
+          right_voltage -= 0.001;
+          m_drivetrain.setRightVolts(right_voltage);
+        }
       }
     }
     

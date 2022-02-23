@@ -16,6 +16,6 @@ public class twoball extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     Drivetrain m_drivetrain = drivetrain;
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new ForwardPID(8, 1, m_drivetrain, true), new ForwardPID(4, 1, m_drivetrain, false));
+    addCommands(new ForwardPID(8, 1, m_drivetrain, true, 0), new ForwardPID(4, 1, m_drivetrain, false, 0));
   }
 }
