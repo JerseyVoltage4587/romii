@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 
 public class ForwardPID extends CommandBase {
@@ -19,14 +20,13 @@ public class ForwardPID extends CommandBase {
   private double m_startTime, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
   private boolean m_forward;
-  private double left_voltage, right_voltage, m_heading;
-  private double adjustedVoltsL, adjustedVoltsR;
-public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, boolean forward, double heading) {
+  private double left_voltage, right_voltage;
+public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, boolean forward, double heading) {
     m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
     m_tolerance  = Units.inchesToMeters(tolerance);   // meters
     m_drivetrain = drivetrain;
+    //m_drivetrain = Robot.getDrivetrain();
     m_forward = forward;
-    m_heading = heading;
     m_profile = new TrapezoidProfile (
                     new TrapezoidProfile.Constraints(Constants.kMaxSpeed,
                                                      Constants.kMaxAcceleration),
