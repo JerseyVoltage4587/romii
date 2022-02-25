@@ -10,108 +10,157 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 
 public class ForwardPID extends CommandBase {
-  /** Creates a new ForwardPID. */
-  Drivetrain m_drivetrain;
-  private double m_startTime, elapsed_time, expected_distance, velocity, acceleration, m_startLeftMeters, m_startRightMeters;
+  private final Drivetrain m_drivetrain;
+  private final double m_distance, m_tolerance;
+  private final TrapezoidProfile m_profile;
+  private double m_startTime, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
-  private double m_tolerance, m_distance;
-  private final TrapezoidProfile.Constraints m_constraints = 
-    new TrapezoidProfile.Constraints(Constants.kMaxSpeed, Constants.kMaxAcceleration);
-  private TrapezoidProfile.State m_goal = new TrapezoidProfile.State(Units.inchesToMeters(96), 0);
-  private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
-  TrapezoidProfile m_profile = new TrapezoidProfile(m_constraints, m_goal, m_setpoint);
-  
-  public ForwardPID( double distance, double tolerance, Drivetrain m_drive ) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    m_drivetrain = m_drive;
-    m_tolerance = Units.inchesToMeters(tolerance);
-    m_distance = Units.feetToMeters(distance);
+  private boolean m_forward;
+  private double left_voltage, right_voltage;
+public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, boolean forward, double heading) {
+    m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
+    m_tolerance  = Units.inchesToMeters(tolerance);   // meters
+    m_drivetrain = drivetrain;
+    //m_drivetrain = Robot.getDrivetrain();
+    m_forward = forward;
+    m_profile = new TrapezoidProfile (
+                    new TrapezoidProfile.Constraints(Constants.kMaxSpeed,
+                                                     Constants.kMaxAcceleration),
+                    new TrapezoidProfile.State(m_distance,0),
+                    new TrapezoidProfile.State(0,0)
+                );
     addRequirements(m_drivetrain);
+    System.out.println("m_distance="+m_distance+",m_tolerance="+m_tolerance+",m_profile.totalTime="+m_profile.totalTime());
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_startTime = Timer.getFPGATimestamp(); // returns system clock time in seconds (double)
-    m_startLeftMeters  = m_drivetrain.getLeftDistanceInches();
-    m_startRightMeters = m_drivetrain.getRightDistanceInches();
-    System.out.println("Initialized!");
-    System.out.println(m_profile.totalTime());
+    m_startTime        = Timer.getFPGATimestamp(); // Get start time
+    m_startLeftMeters  = Units.inchesToMeters(m_drivetrain.getLeftDistanceInches()); // get distance for left
+    m_startRightMeters = Units.inchesToMeters(m_drivetrain.getRightDistanceInches()); // get distance for right
+    System.out.println("m_startTime="+m_startTime+",m_startLeft="+m_startLeftMeters+",m_startRight="+m_startRightMeters);
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // timer
-    elapsed_time = Timer.getFPGATimestamp() - m_startTime;
-    // real distance traveled
-    m_leftTravel  = m_drivetrain.getLeftDistanceInches()  - m_startLeftMeters;
-    m_rightTravel = m_drivetrain.getRightDistanceInches() - m_startRightMeters;
-    System.out.println("Elapsed Time" + elapsed_time);
-    // 
+    double elapsed_time = Timer.getFPGATimestamp() - m_startTime; // subtracts startTime from timer to get more accurate time.
+    m_leftTravel  = Math.abs(Units.inchesToMeters(m_drivetrain.getLeftDistanceInches())  - m_startLeftMeters);
+      // subtracts starting distance from distance to get more accurate distance.
+    m_rightTravel = Math.abs(Units.inchesToMeters(m_drivetrain.getRightDistanceInches()) - m_startRightMeters);
+      // subtracts starting distance from distance to get more accurate distance.
+
     double expected_distance, expected_velocity, expected_acceleration;
-    if(elapsed_time > m_profile.totalTime()) {
-      expected_distance = m_distance;
-      expected_velocity = 0;
-      expected_acceleration = 0;
-      System.out.println("If ran!!");
+    if ( elapsed_time > m_profile.totalTime()) { // when the time passes the expected time
+        expected_distance     = m_distance; // set expected distance to the distance inputted to travel
+        expected_velocity     = 0; // set expected velocity to 0
+        expected_acceleration = 0; // set expected acceleration to 0
+
     }
     else {
-      TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time);
-      TrapezoidProfile.State new_State = m_profile.calculate(elapsed_time + Constants.kSecondsPerCycle);
-      expected_distance = expected_state.position;
-      System.out.println("expected_distance: " + expected_distance);
-      expected_velocity = expected_state.velocity;
-      System.out.println("Velocity: " + velocity);
-      expected_acceleration = (new_State.velocity - expected_state.velocity)/Constants.kSecondsPerCycle;
-      System.out.println("Else ran!!");
+        TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time); // calculated the current expected state
+        TrapezoidProfile.State next_state     = m_profile.calculate(elapsed_time + Constants.kSecondsPerCycle);
+          // calculate the expected state in the next cycle (0.02s)
+        expected_distance     = (expected_state.position); // set expected distance to the position of the current state
+        expected_velocity     = expected_state.velocity; // set expected velocity to the velocity of the current state
+        expected_acceleration = (next_state.velocity - expected_state.velocity) / Constants.kSecondsPerCycle; // 
+
+
+
+
+
     }
 
-    double leftError = expected_distance - m_leftTravel;
-    double rightError = expected_distance - m_rightTravel;
+    double left_error  = Math.abs(expected_distance - m_leftTravel);
+    double right_error = Math.abs(expected_distance - m_rightTravel);
+    if (m_forward == true) {
+      left_voltage = Constants.ksVoltsLeft
+                                + expected_velocity * Constants.kvVoltsLeft
+                                + expected_acceleration * Constants.kaVoltsLeft
+                                + left_error * Constants.kpDriveVel;
 
-    double left_voltage = Constants.ksVoltsLeft
-                           + expected_velocity * Constants.kvVoltsLeft
-                           + expected_acceleration * Constants.kaVoltsLeft
-                           + leftError * Constants.kpDriveVel;
+      right_voltage = Constants.ksVoltsRight
+                                + expected_velocity * Constants.kvVoltsRight
+                                + expected_acceleration * Constants.kaVoltsRight
+                                + right_error * Constants.kpDriveVel;
+      
+    } 
+    else {
+      left_voltage = -1 * (Constants.ksVoltsLeft
+                                + expected_velocity * Constants.kvVoltsLeft
+                                + expected_acceleration * Constants.kaVoltsLeft
+                                + left_error * Constants.kpDriveVel);
 
-    double right_voltage = Constants.ksVoltsRight
-                           + expected_velocity * Constants.kvVoltsRight
-                           + expected_acceleration * Constants.kaVoltsRight
-                           + rightError * Constants.kpDriveVel;
+      right_voltage = -1 * (Constants.ksVoltsRight
+                                + expected_velocity * Constants.kvVoltsRight
+                                + expected_acceleration * Constants.kaVoltsRight
+                                + right_error * Constants.kpDriveVel);
+    }
 
-    m_drivetrain.setLeftVolts(left_voltage);
-    m_drivetrain.setRightVolts(right_voltage);
+    if (Math.abs(m_leftTravel - m_rightTravel) > m_tolerance) {
+        
+    }
+    /*double delta = m_drivetrain.getGyroAngleZ() - m_heading;
+    if (delta != 0) {
+      if (delta > 180) {
+        delta -= 360;
+      }
 
+      if (delta < -180) {
+        delta += 360;
+      }
+
+      if (Math.abs(delta) > 1) {
+        if (delta < 0) {
+          right_voltage += 0.001;
+          m_drivetrain.setRightVolts(right_voltage);
+        }
+        else if (delta > 0) {
+          right_voltage -= 0.001;
+          m_drivetrain.setRightVolts(right_voltage);
+        }
+      }
+    }*/
+    
+      m_drivetrain.setLeftVolts  (left_voltage);
+      m_drivetrain.setRightVolts (right_voltage);
+
+
+    System.out.println("left voltage: " + left_voltage);
+    System.out.println("right voltage: " + right_voltage);
     SmartDashboard.putNumber("Expected Distance", expected_distance);
-    SmartDashboard.putNumber("Expected Velocity", velocity);
-    SmartDashboard.putNumber("Expected Acceleration", acceleration);
+    SmartDashboard.putNumber("Expected Velocity", expected_velocity);
+    SmartDashboard.putNumber("Actual Velocity", ((m_leftTravel + m_rightTravel) / 2)  /elapsed_time);
+    SmartDashboard.putNumber("Expected Acceleration", expected_acceleration);
     SmartDashboard.putNumber("Left Travel", m_leftTravel);
     SmartDashboard.putNumber("Right Travel", m_rightTravel);
-    SmartDashboard.putNumber("Left Error", leftError);
-    SmartDashboard.putNumber("Right Error", rightError);
+    SmartDashboard.putNumber("Left Error", left_error);
+    SmartDashboard.putNumber("Right Error", right_error);
     SmartDashboard.putNumber("Left Voltage", left_voltage);
     SmartDashboard.putNumber("Right Voltage", right_voltage);
-    SmartDashboard.putNumber("Left Shortage", m_leftTravel - expected_distance);
-    SmartDashboard.putNumber("Right Shortage", m_rightTravel - expected_distance);
+    SmartDashboard.putNumber("Left Shortage", m_leftTravel - m_distance);
+    SmartDashboard.putNumber("Right Shortage", m_rightTravel - m_distance);
     SmartDashboard.putNumber("Elapsed Time", elapsed_time);
+    SmartDashboard.putNumber("Expected Completion Time", m_profile.totalTime());
+    SmartDashboard.putNumber("Average Travel", (m_leftTravel + m_rightTravel)/2);
+
   }
-    
-  // Called once the command ends or is interrupted.
+
   @Override
   public void end(boolean interrupted) {
-    m_drivetrain.setLeftVolts(0);
-    m_drivetrain.setRightVolts(0);
+
+        // Let the drivetrain revert to its default command.
   }
-  
+
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (Math.abs(m_leftTravel  - expected_distance) < m_tolerance)
+    return (Math.abs(m_leftTravel  - m_distance) < m_tolerance)
            &&
-           (Math.abs(m_rightTravel - expected_distance) < m_tolerance);
+           (Math.abs(m_rightTravel - m_distance) < m_tolerance);
+    
   }
 }

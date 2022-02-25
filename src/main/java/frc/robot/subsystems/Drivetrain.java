@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
+  static Drivetrain m_Instance = null;
+
   private static final double kCountsPerRevolution = 1440.0;
   private static final double kWheelDiameterInch = 2.75591; // 70 mm
 
@@ -47,12 +49,31 @@ public class Drivetrain extends SubsystemBase {
     resetEncoders();
   }
 
+  public static Drivetrain getInstance() {
+    if (m_Instance == null) {
+      synchronized (Drivetrain.class) {
+        if (m_Instance == null) {
+          m_Instance = new Drivetrain();
+        }
+      }
+    }
+    return m_Instance;
+  }
+
   public void setLeftVolts(double a) {
     m_leftMotor.setVoltage(a);
   }
 
   public void setRightVolts(double a) {
     m_rightMotor.setVoltage(a);
+  }
+
+  public void setLeftMotorLevel(double a) {
+    m_leftMotor.set(a);
+  }
+
+  public void setRightMotorLevel(double a) {
+    m_rightMotor.set(a);
   }
 
   public void arcadeDrive(double xaxisSpeed, double zaxisRotate) {
