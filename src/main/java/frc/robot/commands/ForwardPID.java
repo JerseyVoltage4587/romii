@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 
 public class ForwardPID extends CommandBase {
@@ -19,14 +20,13 @@ public class ForwardPID extends CommandBase {
   private double m_startTime, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
   private boolean m_forward;
-  private double left_voltage, right_voltage, m_heading;
-
-public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, boolean forward, double heading) {
+  private double left_voltage, right_voltage;
+public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, boolean forward, double heading) {
     m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
     m_tolerance  = Units.inchesToMeters(tolerance);   // meters
     m_drivetrain = drivetrain;
+    //m_drivetrain = Robot.getDrivetrain();
     m_forward = forward;
-    m_heading = heading;
     m_profile = new TrapezoidProfile (
                     new TrapezoidProfile.Constraints(Constants.kMaxSpeed,
                                                      Constants.kMaxAcceleration),
@@ -58,7 +58,7 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
         expected_distance     = m_distance; // set expected distance to the distance inputted to travel
         expected_velocity     = 0; // set expected velocity to 0
         expected_acceleration = 0; // set expected acceleration to 0
-        System.out.println("end expected distance: " + expected_distance);
+
     }
     else {
         TrapezoidProfile.State expected_state = m_profile.calculate(elapsed_time); // calculated the current expected state
@@ -67,10 +67,10 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
         expected_distance     = (expected_state.position); // set expected distance to the position of the current state
         expected_velocity     = expected_state.velocity; // set expected velocity to the velocity of the current state
         expected_acceleration = (next_state.velocity - expected_state.velocity) / Constants.kSecondsPerCycle; // 
-        System.out.println("expected distance: "+expected_state.position);
 
-        System.out.println("next expected distance: " + next_state.position);
-        System.out.println((m_leftTravel + m_rightTravel)/2);
+
+
+
 
     }
 
@@ -86,6 +86,7 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
                                 + expected_velocity * Constants.kvVoltsRight
                                 + expected_acceleration * Constants.kaVoltsRight
                                 + right_error * Constants.kpDriveVel;
+      
     } 
     else {
       left_voltage = -1 * (Constants.ksVoltsLeft
@@ -99,7 +100,10 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
                                 + right_error * Constants.kpDriveVel);
     }
 
-    double delta = m_drivetrain.getGyroAngleZ() - m_heading;
+    if (Math.abs(m_leftTravel - m_rightTravel) > m_tolerance) {
+        
+    }
+    /*double delta = m_drivetrain.getGyroAngleZ() - m_heading;
     if (delta != 0) {
       if (delta > 180) {
         delta -= 360;
@@ -119,12 +123,10 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
           m_drivetrain.setRightVolts(right_voltage);
         }
       }
-    }
+    }*/
     
-    else {
       m_drivetrain.setLeftVolts  (left_voltage);
       m_drivetrain.setRightVolts (right_voltage);
-    }
 
 
     System.out.println("left voltage: " + left_voltage);
@@ -144,6 +146,7 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
     SmartDashboard.putNumber("Elapsed Time", elapsed_time);
     SmartDashboard.putNumber("Expected Completion Time", m_profile.totalTime());
     SmartDashboard.putNumber("Average Travel", (m_leftTravel + m_rightTravel)/2);
+
   }
 
   @Override
@@ -158,5 +161,6 @@ public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, bool
     return (Math.abs(m_leftTravel  - m_distance) < m_tolerance)
            &&
            (Math.abs(m_rightTravel - m_distance) < m_tolerance);
+    
   }
 }

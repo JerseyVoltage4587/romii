@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
+  static Drivetrain m_Instance = null;
+
   private static final double kCountsPerRevolution = 1440.0;
   private static final double kWheelDiameterInch = 2.75591; // 70 mm
 
@@ -45,6 +47,17 @@ public class Drivetrain extends SubsystemBase {
     m_leftEncoder.setDistancePerPulse((Math.PI * kWheelDiameterInch) / kCountsPerRevolution);
     m_rightEncoder.setDistancePerPulse((Math.PI * kWheelDiameterInch) / kCountsPerRevolution);
     resetEncoders();
+  }
+
+  public static Drivetrain getInstance() {
+    if (m_Instance == null) {
+      synchronized (Drivetrain.class) {
+        if (m_Instance == null) {
+          m_Instance = new Drivetrain();
+        }
+      }
+    }
+    return m_Instance;
   }
 
   public void setLeftVolts(double a) {
