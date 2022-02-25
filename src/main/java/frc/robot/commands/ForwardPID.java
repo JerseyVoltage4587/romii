@@ -20,8 +20,12 @@ public class ForwardPID extends CommandBase {
   private double m_startTime, m_startLeftMeters, m_startRightMeters;
   private double m_leftTravel, m_rightTravel;
   private boolean m_forward;
-  private double left_voltage, right_voltage;
-public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, boolean forward, double heading) {
+  //private double left_voltage, right_voltage;
+  private double left_voltage, right_voltage/*, m_heading*/;
+  //private double adjustedVoltsL, adjustedVoltsR; // not needed anymore
+public ForwardPID(double distance, double tolerance, Drivetrain drivetrain, boolean forward, double heading) {
+
+//public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, boolean forward, double heading) {
     m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
     m_tolerance  = Units.inchesToMeters(tolerance);   // meters
     m_drivetrain = drivetrain;

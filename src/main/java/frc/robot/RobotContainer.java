@@ -72,8 +72,10 @@ public class RobotContainer {
         .whenInactive(new PrintCommand("Button A Released"));
 
     // Setup SmartDashboard options
-    m_chooser.setDefaultOption("Forward PID", new ForwardPID(m_drivetrain, 4, 1, true, 0));
-    m_chooser.addOption("Twoball", new twoball());
+    m_chooser.setDefaultOption("Forward PID", new ForwardPID(4, 1, m_drivetrain, true, 0));
+    m_chooser.addOption("Twoball", new twoball(m_drivetrain));
+    //m_chooser.setDefaultOption("Forward PID", new ForwardPID(m_drivetrain, 4, 1, true, 0));
+    //m_chooser.addOption("Twoball", new twoball());
     m_chooser.addOption("Auto Routine Distance", new AutonomousDistance(m_drivetrain));
     m_chooser.addOption("Auto Routine Time", new AutonomousTime(m_drivetrain));
     SmartDashboard.putData(m_chooser);

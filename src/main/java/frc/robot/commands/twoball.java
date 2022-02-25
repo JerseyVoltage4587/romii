@@ -12,11 +12,21 @@ import frc.robot.subsystems.Drivetrain;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class twoball extends SequentialCommandGroup {
   /** Creates a new twoball. */
-  private final Drivetrain m_drivetrain = new Drivetrain();
-  public twoball() {
+  public twoball(Drivetrain drivetrain) {
+  //private final Drivetrain m_drivetrain = new Drivetrain();
+  //public twoball() {
     
     // Add your commands in the addCommands() call, e.g.
+    
+    Drivetrain m_drivetrain = drivetrain;
+    /*
+    ForwardPID commandI = new ForwardPID(8, 1, m_drivetrain, true, 0);
+    printdone commandII = new printdone("don1");
+    ForwardPID commandIII = new ForwardPID(4, 1, m_drivetrain, false, 0); 
+    printdone commandIV = new printdone("don2");
+    */
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new ForwardPID(m_drivetrain,8, 1, true, 0), new ForwardPID(m_drivetrain,4, 1, false, 0));
+    addCommands(new ForwardPID(8, 1, m_drivetrain, true, 0), new ForwardPID(4, 1, m_drivetrain, false, 0));
+    //addCommands(new ForwardPID(m_drivetrain,8, 1, true, 0), new ForwardPID(m_drivetrain,4, 1, false, 0));
   }
 }

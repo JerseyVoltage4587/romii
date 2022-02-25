@@ -12,9 +12,9 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
-  static Drivetrain m_Instance = null;
+  //static Drivetrain m_Instance = null; // old
 
-  private static final double kCountsPerRevolution = 1440.0;
+  private static final double kCountsPerRevolution = 1440.0;  
   private static final double kWheelDiameterInch = 2.75591; // 70 mm
 
   // The Romi has the left and right motors set to
@@ -48,7 +48,7 @@ public class Drivetrain extends SubsystemBase {
     m_rightEncoder.setDistancePerPulse((Math.PI * kWheelDiameterInch) / kCountsPerRevolution);
     resetEncoders();
   }
-
+/*
   public static Drivetrain getInstance() {
     if (m_Instance == null) {
       synchronized (Drivetrain.class) {
@@ -59,7 +59,7 @@ public class Drivetrain extends SubsystemBase {
     }
     return m_Instance;
   }
-
+*/
   public void setLeftVolts(double a) {
     m_leftMotor.setVoltage(a);
   }
