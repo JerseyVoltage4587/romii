@@ -16,9 +16,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
-  static Drivetrain m_Instance = null;
+  //static Drivetrain m_Instance = null; // old
 
-  private static final double kCountsPerRevolution = 1440.0;
+  private static final double kCountsPerRevolution = 1440.0;  
   private static final double kWheelDiameterInch = 2.75591; // 70 mm
 
 
@@ -45,6 +45,8 @@ public class Drivetrain extends SubsystemBase {
 
   // Set up the BuiltInAccelerometer
   private final BuiltInAccelerometer m_accelerometer /*= new BuiltInAccelerometer()*/;
+  
+  public static Drivetrain m_Instance;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
