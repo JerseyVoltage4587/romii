@@ -4,11 +4,15 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import frc.robot.Constants;
 import frc.robot.sensors.RomiGyro;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
@@ -17,36 +21,53 @@ public class Drivetrain extends SubsystemBase {
   private static final double kCountsPerRevolution = 1440.0;
   private static final double kWheelDiameterInch = 2.75591; // 70 mm
 
+
+  private double lastLeftDistance;
+  private double lastRightDistance;
+  private double lastTimePassed;
+
+
   // The Romi has the left and right motors set to
   // PWM channels 0 and 1 respectively
-  private final Spark m_leftMotor = new Spark(0);
-  private final Spark m_rightMotor = new Spark(1);
+  private final Spark m_leftMotor/* = new Spark(0)*/;
+  private final Spark m_rightMotor/* = new Spark(1)*/;
 
   // The Romi has onboard encoders that are hardcoded
   // to use DIO pins 4/5 and 6/7 for the left and right
-  private final Encoder m_leftEncoder = new Encoder(4, 5);
-  private final Encoder m_rightEncoder = new Encoder(6, 7);
+  private final Encoder m_leftEncoder /*= new Encoder(4, 5)*/;
+  private final Encoder m_rightEncoder /*= new Encoder(6, 7)*/;
 
   // Set up the differential drive controller
-  private final DifferentialDrive m_diffDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
+  private final DifferentialDrive m_diffDrive/* = new DifferentialDrive(m_leftMotor, m_rightMotor) */;
 
   // Set up the RomiGyro
-  private final RomiGyro m_gyro = new RomiGyro();
+  private final RomiGyro m_gyro /*= new RomiGyro()*/;
 
   // Set up the BuiltInAccelerometer
-  private final BuiltInAccelerometer m_accelerometer = new BuiltInAccelerometer();
+  private final BuiltInAccelerometer m_accelerometer /*= new BuiltInAccelerometer()*/;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
+    m_leftMotor = new Spark(0);
+    m_rightMotor = new Spark(1);
+    m_diffDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
+    m_leftEncoder = new Encoder(4, 5);
+    m_rightEncoder = new Encoder(6, 7);
+    m_gyro = new RomiGyro();
+    m_accelerometer = new BuiltInAccelerometer();
     m_rightMotor.setInverted(true);
 
     // Use inches as unit for encoder distances
     m_leftEncoder.setDistancePerPulse((Math.PI * kWheelDiameterInch) / kCountsPerRevolution);
     m_rightEncoder.setDistancePerPulse((Math.PI * kWheelDiameterInch) / kCountsPerRevolution);
     resetEncoders();
+
+    lastLeftDistance = getLeftDistanceInches();
+    lastRightDistance = getRightDistanceInches();
+    lastTimePassed = Timer.getFPGATimestamp();
   }
 
   public static Drivetrain getInstance() {
@@ -167,5 +188,19 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    double deltaT = Timer.getFPGATimestamp() - lastTimePassed;
+    SmartDashboard.putNumber("LDI-JSDT", getLeftDistanceInches());
+    SmartDashboard.putNumber("RDI-JSDT", getRightDistanceInches());
+    if (deltaT > 0) {
+      SmartDashboard.putNumber("LVT-JSDT", Units.inchesToMeters(getLeftDistanceInches() - lastLeftDistance) / deltaT);
+    }
+    if (deltaT > 0) {
+      SmartDashboard.putNumber("RVT-JSDT", Units.inchesToMeters(getRightDistanceInches() - lastRightDistance / deltaT));
+    }
+    lastLeftDistance = getLeftDistanceInches();
+    lastRightDistance = getRightDistanceInches();
+    lastTimePassed = Timer.getFPGATimestamp();
+    SmartDashboard.putNumber("LeftML", m_leftMotor.get());
+    SmartDashboard.putNumber("RightML", m_rightMotor.get());
   }
 }

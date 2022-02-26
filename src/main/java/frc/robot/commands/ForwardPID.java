@@ -21,11 +21,10 @@ public class ForwardPID extends CommandBase {
   private double m_leftTravel, m_rightTravel;
   private boolean m_forward;
   private double left_voltage, right_voltage;
-public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, boolean forward, double heading) {
+public ForwardPID(double distance, double tolerance, boolean forward, double heading) {
     m_distance   = Math.abs(Units.feetToMeters(distance));    // meters
     m_tolerance  = Units.inchesToMeters(tolerance);   // meters
-    m_drivetrain = drivetrain;
-    //m_drivetrain = Robot.getDrivetrain();
+    m_drivetrain = Robot.getDrivetrain();
     m_forward = forward;
     m_profile = new TrapezoidProfile (
                     new TrapezoidProfile.Constraints(Constants.kMaxSpeed,
@@ -34,7 +33,7 @@ public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, bool
                     new TrapezoidProfile.State(0,0)
                 );
     addRequirements(m_drivetrain);
-    System.out.println("m_distance="+m_distance+",m_tolerance="+m_tolerance+",m_profile.totalTime="+m_profile.totalTime());
+    System.out.println("m_distance = "+m_distance+", m_tolerance="+m_tolerance+",m_profile.totalTime="+m_profile.totalTime());
   }
 
   @Override
@@ -80,29 +79,29 @@ public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, bool
       left_voltage = Constants.ksVoltsLeft
                                 + expected_velocity * Constants.kvVoltsLeft
                                 + expected_acceleration * Constants.kaVoltsLeft
-                                + left_error * Constants.kpDriveVel;
+                                + left_error * Constants.kpDriveVelLeft;
 
       right_voltage = Constants.ksVoltsRight
                                 + expected_velocity * Constants.kvVoltsRight
                                 + expected_acceleration * Constants.kaVoltsRight
-                                + right_error * Constants.kpDriveVel;
+                                + right_error * Constants.kpDriveVelRight;
       
     } 
     else {
       left_voltage = -1 * (Constants.ksVoltsLeft
                                 + expected_velocity * Constants.kvVoltsLeft
                                 + expected_acceleration * Constants.kaVoltsLeft
-                                + left_error * Constants.kpDriveVel);
+                                + left_error * Constants.kpDriveVelLeft);
 
       right_voltage = -1 * (Constants.ksVoltsRight
                                 + expected_velocity * Constants.kvVoltsRight
                                 + expected_acceleration * Constants.kaVoltsRight
-                                + right_error * Constants.kpDriveVel);
+                                + right_error * Constants.kpDriveVelRight);
     }
 
-    if (Math.abs(m_leftTravel - m_rightTravel) > m_tolerance) {
+/*     if (Math.abs(m_leftTravel - m_rightTravel) > m_tolerance) {
         
-    }
+    } */
     /*double delta = m_drivetrain.getGyroAngleZ() - m_heading;
     if (delta != 0) {
       if (delta > 180) {
@@ -129,8 +128,6 @@ public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, bool
       m_drivetrain.setRightVolts (right_voltage);
 
 
-    System.out.println("left voltage: " + left_voltage);
-    System.out.println("right voltage: " + right_voltage);
     SmartDashboard.putNumber("Expected Distance", expected_distance);
     SmartDashboard.putNumber("Expected Velocity", expected_velocity);
     SmartDashboard.putNumber("Actual Velocity", ((m_leftTravel + m_rightTravel) / 2)  /elapsed_time);
@@ -151,7 +148,9 @@ public ForwardPID(Drivetrain drivetrain, double distance, double tolerance, bool
 
   @Override
   public void end(boolean interrupted) {
-
+        m_drivetrain.setLeftMotorLevel(0);
+        m_drivetrain.setRightMotorLevel(0); 
+        
         // Let the drivetrain revert to its default command.
   }
 
