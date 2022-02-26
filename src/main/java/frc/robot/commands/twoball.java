@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Robot;
 import frc.robot.subsystems.Drivetrain;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -12,11 +13,11 @@ import frc.robot.subsystems.Drivetrain;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class twoball extends SequentialCommandGroup {
   /** Creates a new twoball. */
-  private final Drivetrain m_drivetrain = new Drivetrain();
+  private final Drivetrain m_drivetrain;
   public twoball() {
-    
+    m_drivetrain = Robot.getDrivetrain();
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new ForwardPID(m_drivetrain,8, 1, true, 0), new ForwardPID(m_drivetrain,4, 1, false, 0));
+    addCommands(new ForwardPID(8, 1, true, 0), new ForwardPID(4, 1, false, 0));
   }
 }

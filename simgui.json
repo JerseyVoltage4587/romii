@@ -44,25 +44,28 @@
       }
     },
     "LiveWindow": {
-      ".status": {
-        "open": true
-      },
-      "Drivetrain": {
-        "open": true
-      },
-      "OnBoardIO": {
-        "open": true
-      },
       "Ungrouped": {
+        "Encoder[0]": {
+          "open": true
+        },
+        "Scheduler": {
+          "open": true
+        },
         "open": true
       }
+    },
+    "Romi": {
+      "Information": {
+        "open": true
+      },
+      "Status": {
+        "open": true
+      },
+      "open": true
     },
     "SmartDashboard": {
       "open": true
     }
-  },
-  "NetworkTables View": {
-    "visible": false
   },
   "Plot": {
     "Plot <0>": {
@@ -98,26 +101,8 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": -9,
+          "height": 486,
           "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Average Travel"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Right Travel"
-            },
             {
               "color": [
                 0.3333333432674408,
@@ -162,6 +147,60 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/Expected Distance"
+            },
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Average Travel"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Right Travel"
+            },
+            {
+              "color": [
+                0.5490196347236633,
+                0.5490196347236633,
+                0.5490196347236633,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/LVT-JSDT"
+            },
+            {
+              "color": [
+                0.8000000715255737,
+                0.7254902124404907,
+                0.4549019932746887,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/RVT-JSDT"
+            },
+            {
+              "color": [
+                0.3921568989753723,
+                0.7098039388656616,
+                0.803921639919281,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/LDI-JSDT"
+            },
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/RDI-JSDT"
             }
           ]
         }

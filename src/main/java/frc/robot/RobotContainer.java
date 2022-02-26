@@ -29,13 +29,13 @@ import edu.wpi.first.wpilibj2.command.button.Button;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final Drivetrain m_drivetrain = new Drivetrain();
-  private final OnBoardIO m_onboardIO = new OnBoardIO(ChannelMode.INPUT, ChannelMode.INPUT);
+  private final Drivetrain m_drivetrain;
+  private final OnBoardIO m_onboardIO;
   // Assumes a gamepad plugged into channnel 0
-  private final Joystick m_controller = new Joystick(0);
+  private final Joystick m_controller;
 
   // Create SmartDashboard chooser for autonomous routines
-  private final SendableChooser<Command> m_chooser = new SendableChooser<>();
+  private final SendableChooser<Command> m_chooser;
 
   // NOTE: The I/O pin functionality of the 5 exposed I/O pins depends on the hardware "overlay"
   // that is specified when launching the wpilib-ws server on the Romi raspberry pi.
@@ -50,6 +50,10 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    m_drivetrain = Robot.getDrivetrain();
+    m_onboardIO = new OnBoardIO(ChannelMode.INPUT, ChannelMode.INPUT);
+    m_controller = new Joystick(0);
+    m_chooser = new SendableChooser<>();
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -72,7 +76,7 @@ public class RobotContainer {
         .whenInactive(new PrintCommand("Button A Released"));
 
     // Setup SmartDashboard options
-    m_chooser.setDefaultOption("Forward PID", new ForwardPID(m_drivetrain, 4, 1, true, 0));
+    m_chooser.setDefaultOption("Forward PID", new ForwardPID(4, 1, true, 0));
     m_chooser.addOption("Twoball", new twoball());
     m_chooser.addOption("Auto Routine Distance", new AutonomousDistance(m_drivetrain));
     m_chooser.addOption("Auto Routine Time", new AutonomousTime(m_drivetrain));
