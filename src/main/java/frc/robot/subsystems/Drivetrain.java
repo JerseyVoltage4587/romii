@@ -91,6 +91,13 @@ public class Drivetrain extends SubsystemBase {
     m_rightMotor.setVoltage(a);
   }
 
+  public double getLeftMotor() {
+    return m_leftMotor.get();
+  }
+  public double getRightMotor() {
+    return m_rightMotor.get();
+  }
+
   public void setLeftMotorLevel(double a) {
     m_leftMotor.set(a);
   }
@@ -202,7 +209,7 @@ public class Drivetrain extends SubsystemBase {
     lastLeftDistance = getLeftDistanceInches();
     lastRightDistance = getRightDistanceInches();
     lastTimePassed = Timer.getFPGATimestamp();
-    SmartDashboard.putNumber("LeftML", m_leftMotor.get());
-    SmartDashboard.putNumber("RightML", m_rightMotor.get());
+    // SmartDashboard.putNumber("LeftML", m_leftMotor.get());
+    // SmartDashboard.putNumber("RightML", m_rightMotor.get());
   }
 }
